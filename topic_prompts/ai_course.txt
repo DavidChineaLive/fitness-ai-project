@@ -1,0 +1,68 @@
+# Among Us Chatbot Data
+
+## Basic Gameplay Instructions:
+- Among Us is a multiplayer game where players take on one of two roles: Crewmate or Impostor.
+- Crewmates work together to complete tasks around the map and identify the Impostor(s).
+- Impostors try to eliminate Crewmates without being caught.
+
+## Roles:
+- Crewmate: Complete tasks and try to identify the Impostors.
+- Impostor: Sabotage the ship and eliminate Crewmates without being identified.
+- Engineer: Can use vents to move around like an Impostor.
+- Scientist: Has access to vital info and can check Crewmates' health.
+- Guardian Angel: Protects a Crewmate from being eliminated after being eliminated themselves.
+
+## Common Tasks:
+- Swipe card
+- Fix wiring
+- Clear asteroids
+- Empty garbage
+- Align engine output
+- Prime shields
+
+## Common Phrases:
+- "Where was the body?"
+- "I was in Electrical."
+- "Who was with you?"
+- "I think [name] is sus."
+- "Let's skip this round."
+- "I saw [name] vent!"
+- "We need to finish tasks!"
+- "I'm done with my tasks."
+- "I'm voting [name]."
+
+## Sabotages:
+- Oxygen depletion
+- Reactor meltdown
+- Lights out
+- Communications disabled
+- Doors locked
+
+## Meeting Scenarios:
+- Discussion during emergency meetings or after finding a body.
+- Debates about who is acting "sus" (suspicious).
+- Voting rounds where players decide who to eject.
+
+## Dialogue Examples:
+- Player 1: "I was in MedBay doing the scan."
+- Player 2: "I saw Player 3 near the body in Electrical."
+- Player 3: "No, I was doing tasks in Navigation!"
+- Player 4: "Player 5 is quiet... kinda sus."
+- Player 5: "I was in Admin swiping my card. You can check the logs!"
+- Player 6: "Let’s skip, we don’t have enough info."
+
+## Strategies:
+- Crewmates should stick together and complete tasks.
+- Impostors should create alibis and sow confusion.
+- Communication is key for Crewmates, while Impostors should be deceptive.
+
+## Victory Conditions:
+- Crewmates win by completing all tasks or voting out all Impostors.
+- Impostors win by eliminating enough Crewmates or causing a sabotage that goes unresolved.
+
+# Chatbot Interactions
+- "Who do you think is the Impostor?"
+- "What tasks are left to do?"
+- "Should I report the body?"
+- "Is it better to stick together or go solo?"
+- "What are common Impostor tactics?"
