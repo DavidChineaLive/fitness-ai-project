@@ -1,1 +1,1 @@
-# fitness-ai-project
+# Fitness AI Project
