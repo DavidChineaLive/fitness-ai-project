@@ -24,14 +24,13 @@ def home():
 @app.route('/chat', methods=['POST'])
 def chat():
     user_message = request.json['message']
-    animal_type = request.json['animalType']
 
     if 'conversation' not in session:
         session['conversation'] = []
 
     session['conversation'].append({"role": "user", "content": user_message})
 
-    system_message = f"The user is showing a picture of a {animal_type}. Respond accordingly, and give suggestions for a halloween costume for the pet you see"
+    system_message = f"The user is asking for workout advice. Provide suggestions on improving exercise form or general fitness guidance."
     messages = [{
         "role": "system",
         "content": system_message
