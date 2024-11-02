@@ -25,6 +25,32 @@ button {
     border: none;
 }
 
+#webcam-container {
+    position: relative;
+    width: 640px; 
+    height: 480px;
+    overflow: hidden;
+}
+
+#webcam-container video {
+    position: absolute;
+    top: 0;
+    left: 0;
+    transform: scaleX(-1); 
+    width: 100%; 
+    height: 100%; 
+    z-index: 1; 
+}
+
+#canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%; 
+    height: 100%; 
+    z-index: 2;
+}
+
 /* Page Styling */
 .page {
     width: 80%;
@@ -75,3 +101,4 @@ body.dark-mode button {
     background-color: #666;
     color: #f0f0f0;
 }
+
