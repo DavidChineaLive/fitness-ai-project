@@ -21,7 +21,7 @@
         
         <!-- Workout selection buttons -->
         <div class="workout-options">
-            <button onclick="navigateTo('bodyweight')">Weights Workout</button>
+            <button onclick="navigateTo('weights')">Weights Workout</button>
             <button onclick="navigateTo('bodyweight')">Bodyweight Workout</button>
         </div>
         
@@ -53,11 +53,19 @@
         <button onclick="navigateToExercise('exercise', 'Pull-ups')">Pull-ups</button>
     </div>
 
+    <!-- Weights Workout Page -->
+    <div id="weights-page" class="page hidden">
+        <h2 id="workout-type">Weights Exercises</h2>
+        <button onclick="navigateToExercise('exercise', 'Bench')">Bench</button>
+        <button onclick="navigateToExercise('exercise', 'Barbell Squats')">Barbell Squat</button>
+        <button onclick="navigateToExercise('exercise', 'Deadlift')">Deadlift</button>
+    </div>
+
     <div id="exercise-page" class="page hidden">
         <h2 id="exercise-title">[Exercise type]</h2>
         <div id="webcam-container">
-            <video autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" width="640" height="480"></canvas>
+            <video id="video" width="640" height="480" autoplay playsinline></video>
         </div>
         <div id="label-container"></div>
         <button type="button" onclick="init()">Start Workout</button>

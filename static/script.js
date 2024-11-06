@@ -1,12 +1,17 @@
-let detector, webcam, ctx, labelContainer;
+let bodyTracker, video, ctx, labelContainer;
 let currentExercise = "";
 let currentPage = 'home';
 let squatCount = 0;
 let pushupCount = 0;
 let pullupCount = 0;
+let benchCount = 0; 
+let deadliftCount = 0; 
 let isSquatting = false; // For squat detection
 let isDoingPushup = false; // For push-up detection
 let isDoingPullup = false; // For pull-up detection
+let isDoingBench = false; // For bench detection 
+let isDoingDeadlift = false; // For deadlift detection 
+
 
 async function init() {
     const workoutType = currentPage === 'weights' ? 'Weights Workout' : 'Bodyweight Workout';
@@ -58,12 +63,25 @@ async function loop() {
 
     if (poses && poses.length > 0) {
         drawPose(poses[0]);
-        if (currentExercise === 'Squats') {
-            detectSquat(poses[0]);
-        } else if (currentExercise === 'Push-ups') {
-            detectSquat(poses[0]);
-        } else if (currentExercise === 'Pull-ups') {
-            detectSquat(poses[0]);
+        switch (currentExercise) {
+            case 'Squats':
+                detectSquat(poses[0]);
+                break;
+            case 'Push-ups':
+                detectPushup(poses[0]); // Implement this function for push-up detection
+                break;
+            case 'Pull-ups':
+                detectSquat(poses[0]);//detectPullup(poses[0]); // Implement this function for pull-up detection
+                break;
+            case 'Bench':
+                detectSquat(poses[0]);//detectBench(poses[0]); // Implement this function for bench detection
+                break;
+            case 'Barbell Squats':
+                detectSquat(poses[0]); // Use the same squat detection for Barbell Squat
+                break;
+            case 'Deadlift':
+                detectSquat(poses[0]);//detectDeadlift(poses[0]); // Implement this function for deadlift detection
+                break;
         }
     }
 
@@ -75,47 +93,101 @@ function detectSquat(pose) {
 
     // Check if keypoints are available and have high confidence
     if (keypoints && keypoints[11].score > 0.5 && keypoints[12].score > 0.5 && 
-        keypoints[13].score > 0.5 && keypoints[14].score > 0.5 && 
-        keypoints[15].score > 0.5 && keypoints[16].score > 0.5) {
+        keypoints[13].score > 0.5 && keypoints[14].score > 0.5){
         const leftHip = keypoints[11]; // Left hip
         const rightHip = keypoints[12]; // Right hip
         const leftKnee = keypoints[13]; // Left knee
         const rightKnee = keypoints[14]; // Right knee
-        const leftAnkle = keypoints[15]; // Left ankle
-        const rightAnkle = keypoints[16]; // Right ankle
+        
 
         // Calculate angles for both legs
-        const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
-        const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
+        const leftAngle = calculateTwoPointAngle(leftHip, leftKnee);
+        const rightAngle = calculateTwoPointAngle(rightHip, rightKnee);
         
         
         // Check if the user is in a squat position
-        if (leftAngle < 120 || rightAngle < 120){//knee.y < hip.y && knee.y < ankle.y) {
+        if (leftAngle < 45 || rightAngle < 45){
             // User is squatting
             console.log(`User is squatting`);
+            console.log(`Left: ${leftAngle}, Right: ${rightAngle}`);
             if (!isSquatting) {
-                isSquatting = true; // Set the state to squatting
+                isSquatting = true; 
             }
         } else {
             console.log(`User is not squatting`);
             // User is not squatting
             if (isSquatting) {
-                squatCount++; // Increment the squat count
-                isSquatting = false; // Reset the state
-                console.log(`Squat Count: ${squatCount}`); // Log the count (you can display this in the UI)
+                squatCount++; 
+                isSquatting = false; 
+                console.log(`***`); 
+                console.log(`Squat Count: ${squatCount}`); // Log the count 
+                console.log(`***`); 
                 document.getElementById('rep-count').textContent = `Squat Count: ${squatCount}`;
             }
         }
     }
 }
 
-function calculateAngle(pointA, pointB, pointC) {
-    const a = Math.sqrt(Math.pow(pointB.x - pointA.x, 2) + Math.pow(pointB.y - pointA.y, 2));
-    const b = Math.sqrt(Math.pow(pointB.x - pointC.x, 2) + Math.pow(pointB.y - pointC.y, 2));
-    const c = Math.sqrt(Math.pow(pointC.x - pointA.x, 2) + Math.pow(pointC.y - pointA.y, 2));
+function detectPushup(pose) {
+    const keypoints = pose.keypoints;
 
-    const angle = Math.acos((b * b + a * a - c * c) / (2 * a * b)) * (180 / Math.PI);
-    return angle;
+    // Check if keypoints are available and have high confidence
+    if (keypoints && keypoints[5].score > 0.5 && keypoints[6].score > 0.5 && 
+        keypoints[7].score > 0.5 && keypoints[8].score > 0.5){ 
+        
+        const leftShoulder = keypoints[5]; 
+        const rightShoulder = keypoints[6]; 
+        const leftElbow = keypoints[7]; 
+        const rightElbow = keypoints[8]; 
+        
+
+        // Calculate the angle at the elbows
+        const leftElbowAngle = calculateTwoPointAngle(leftShoulder, leftElbow);
+        const rightElbowAngle = calculateTwoPointAngle(rightShoulder, rightElbow);
+
+        // Check if the user is in a push-up position
+        const isInPushupPosition = (leftElbowAngle < 45 || rightElbowAngle < 45); 
+
+        if (isInPushupPosition) {
+            // User is in the lowering phase of the push-up
+            console.log(`User is doing a push up`);
+            console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
+            if (!isDoingPushup) {
+                isDoingPushup = true; 
+            }
+        } else {
+            // User is not in the push-up position
+            if (isDoingPushup) {
+                pushupCount++; 
+                isDoingPushup = false; 
+                console.log(`Push-up Count: ${pushupCount}`); 
+                document.getElementById('rep-count').textContent = `Push-up Count: ${pushupCount}`;
+            }
+        }
+    }
+}
+
+function calculateTwoPointAngle(hip, knee) {
+    // Get the coordinates of the hip and knee
+    const hipX = hip.x;
+    const hipY = hip.y;
+    const kneeX = knee.x;
+    const kneeY = knee.y;
+
+    // Calculate the difference in coordinates
+    const deltaX = kneeX - hipX; // Horizontal distance
+    const deltaY = kneeY - hipY; // Vertical distance
+
+    // Calculate the angle in radians
+    const angleInRadians = Math.atan2(deltaY, deltaX);
+
+    // Convert the angle to degrees
+    const angleInDegrees = angleInRadians * (180 / Math.PI);
+
+    // Normalize the angle to be between 0 and 180 degrees
+    const normalizedAngle = angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
+
+    return normalizedAngle;
 }
 
 // Draw Pose
@@ -163,12 +235,16 @@ function stopWorkout() {
         tracks.forEach(track => track.stop());
         webcam.srcObject = null;
     }
-    if (currentExercise === 'Squats') {
+    if (currentExercise === 'Squats' || currentExercise === "Barbell Squats") {
         squatCount = 0;
     } else if (currentExercise === 'Push-ups') {
         pushupCount = 0;
     } else if (currentExercise === 'Pull-ups') {
         pullupCount = 0;
+    } else if (currentExercise === 'Bench') {
+        benchCount = 0;
+    } else if (currentExercise === 'Deadlift') {
+        deadliftCount = 0;
     }
     document.getElementById('webcam-container').style.display = 'none';
     document.getElementById('canvas').style.display = 'none';
