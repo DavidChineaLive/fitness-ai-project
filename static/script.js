@@ -4,12 +4,14 @@ let currentPage = 'home';
 let squatCount = 0;
 let pushupCount = 0;
 let pullupCount = 0;
-let benchCount = 0; 
+let curlCount = 0; 
+let shoulderPressCount =0;
 let deadliftCount = 0; 
 let isSquatting = false; // For squat detection
 let isDoingPushup = false; // For push-up detection
 let isDoingPullup = false; // For pull-up detection
-let isDoingBench = false; // For bench detection 
+let isDoingCurl = false; // For bench detection 
+let isDoingShoulderPress = false; // For shoulder press detection
 let isDoingDeadlift = false; // For deadlift detection 
 
 
@@ -71,16 +73,16 @@ async function loop() {
                 detectPushup(poses[0]); // Implement this function for push-up detection
                 break;
             case 'Pull-ups':
-                detectSquat(poses[0]);//detectPullup(poses[0]); // Implement this function for pull-up detection
+                detectPullup(poses[0]); // Implement this function for pull-up detection
                 break;
-            case 'Bench':
+            case 'Curls':
                 detectSquat(poses[0]);//detectBench(poses[0]); // Implement this function for bench detection
                 break;
-            case 'Barbell Squats':
-                detectSquat(poses[0]); // Use the same squat detection for Barbell Squat
+            case 'Shoulder Press':
+                detectShoulderPress(poses[0]); // Use the same squat detection for Barbell Squat
                 break;
             case 'Deadlift':
-                detectSquat(poses[0]);//detectDeadlift(poses[0]); // Implement this function for deadlift detection
+                detectDeadlift(poses[0]); // Implement this function for deadlift detection
                 break;
         }
     }
@@ -167,6 +169,124 @@ function detectPushup(pose) {
     }
 }
 
+function detectPullup(pose) {
+    const keypoints = pose.keypoints;
+
+    // Check if keypoints are available and have high confidence
+    if (keypoints && keypoints[5].score > 0.5 && keypoints[6].score > 0.5 && 
+        keypoints[7].score > 0.5 && keypoints[8].score > 0.5){ 
+        //console.log(`In pull-up detection mode.`);
+        const leftShoulder = keypoints[5]; 
+        const rightShoulder = keypoints[6]; 
+        const leftElbow = keypoints[7]; 
+        const rightElbow = keypoints[8]; 
+        const leftWrist = keypoints[9]; // Left wrist
+        const rightWrist = keypoints[10]; // Right wrist
+        
+
+        // Calculate the angle at the elbows
+        //const leftElbowAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
+        const rightElbowAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
+
+        // Check if the user is in a pull-up position
+        //const isInPullupPosition = (leftElbowAngle < 30 || rightElbowAngle < 30); 
+        //const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
+        //const isArmsAboveHead = (leftWrist.y < leftShoulder.y || rightWrist.y < rightShoulder.y);
+        //console.log(`----------`); 
+        console.log(`L Sho Y: ${leftShoulder.y}, El Y: ${leftElbow.y}, ${isInPullupPosition}`);
+        console.log(`R Sho Y: ${rightShoulder.y}, El Y: ${rightElbow.y}, ${isInPullupPosition}`);
+        //console.log(`----------`); 
+        if (isInPullupPosition){//&& isArmsAboveHead) {
+            // User is in the lowering phase of the pull-up
+            console.log(`User is doing a pull up`);
+            //console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
+            if (!isDoingPullup) {
+                isDoingPullup = true; 
+            }
+        } else {
+            // User is not in the pull-up position
+            if (isDoingPullup) {
+                pullupCount++; 
+                isDoingPullup = false; 
+                
+                console.log(`***`); 
+                //console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
+                console.log(`Pull-up Count: ${pullupCount}`); 
+                console.log(`***`); 
+                document.getElementById('rep-count').textContent = `Pull-up Count: ${pullupCount}`;
+            }
+        }
+    }
+}
+
+function detectDeadlift(pose){
+    const keypoints = pose.keypoints;
+
+    // Check if keypoints are available and have high confidence
+    if (keypoints && keypoints[9].score > 0.5 && keypoints[10].score > 0.5 && 
+        keypoints[13].score > 0.5 && keypoints[14].score > 0.5){ 
+        
+        const leftWrist = keypoints[9]; // Left wrist
+        const rightWrist = keypoints[10]; // Right wrist
+        const leftKnee = keypoints[13]; // Left knee
+        const rightKnee = keypoints[14]; // Right knee
+
+        // Check if the user is in a deadlift position
+        const isInDeadliftPosition = (leftWrist.y > leftKnee.y || rightWrist.y > rightKnee.y); 
+        
+        if (isInDeadliftPosition) {
+            // User is in the lowering phase of the deadlift
+            console.log(`User is doing a deadlift`);
+            if (!isDoingDeadlift) {
+                isDoingDeadlift = true; 
+            }
+        } else {
+            // User is not in the deadlift position
+            if (isDoingDeadlift) {
+                deadliftCount++; 
+                isDoingDeadlift = false; 
+                console.log(`Deadlift Count: ${deadliftCount}`); 
+                document.getElementById('rep-count').textContent = `Deadlift Count: ${deadliftCount}`;
+            }
+        }
+    }
+}
+
+function detectShoulderPress(pose) {
+    const keypoints = pose.keypoints;
+
+    // Check if keypoints are available and have high confidence
+    if (keypoints && keypoints[5].score > 0.5 && keypoints[6].score > 0.5 && 
+        keypoints[7].score > 0.5 && keypoints[8].score > 0.5){ 
+        const leftShoulder = keypoints[5]; 
+        const rightShoulder = keypoints[6]; 
+        const leftElbow = keypoints[7]; 
+        const rightElbow = keypoints[8]; 
+
+        // Check if the user is in a shoulder press position
+        const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
+        
+        if (isInPullupPosition){
+            // User is in the lowering phase of the shoulder press
+            console.log(`User is doing a shoulder press`);
+            if (!isDoingShoulderPress) {
+                isDoingShoulderPress = true; 
+            }
+        } else {
+            // User is not in the shoulder press position
+            if (isDoingShoulderPress) {
+                shoulderPressCount++; 
+                isDoingShoulderPress = false; 
+                
+                console.log(`***`); 
+                console.log(`Shoulder Press Count: ${shoulderPressCount}`); 
+                console.log(`***`); 
+                document.getElementById('rep-count').textContent = `Shoulder Press Count: ${shoulderPressCount}`;
+            }
+        }
+    }
+}
+
 function calculateTwoPointAngle(hip, knee) {
     // Get the coordinates of the hip and knee
     const hipX = hip.x;
@@ -188,6 +308,15 @@ function calculateTwoPointAngle(hip, knee) {
     const normalizedAngle = angleInDegrees < 0 ? angleInDegrees + 360 : angleInDegrees;
 
     return normalizedAngle;
+}
+
+function calculateAngle(pointA, pointB, pointC) {
+    const a = Math.sqrt(Math.pow(pointB.x - pointA.x, 2) + Math.pow(pointB.y - pointA.y, 2));
+    const b = Math.sqrt(Math.pow(pointB.x - pointC.x, 2) + Math.pow(pointB.y - pointC.y, 2));
+    const c = Math.sqrt(Math.pow(pointC.x - pointA.x, 2) + Math.pow(pointC.y - pointA.y, 2));
+
+    const angle = Math.acos((b * b + a * a - c * c) / (2 * a * b)) * (180 / Math.PI);
+    return angle;
 }
 
 // Draw Pose
@@ -235,19 +364,21 @@ function stopWorkout() {
         tracks.forEach(track => track.stop());
         webcam.srcObject = null;
     }
-    if (currentExercise === 'Squats' || currentExercise === "Barbell Squats") {
+    if (currentExercise === 'Squats') {
         squatCount = 0;
     } else if (currentExercise === 'Push-ups') {
         pushupCount = 0;
     } else if (currentExercise === 'Pull-ups') {
         pullupCount = 0;
-    } else if (currentExercise === 'Bench') {
-        benchCount = 0;
+    } else if(currentExercise === 'Curls') {
+        curlCount = 0;
+    } else if (currentExercise === 'Shoulder Press') {
+        shoulderPressCount = 0;
     } else if (currentExercise === 'Deadlift') {
         deadliftCount = 0;
     }
-    document.getElementById('webcam-container').style.display = 'none';
-    document.getElementById('canvas').style.display = 'none';
+    //document.getElementById('webcam-container').style.display = 'none';
+    //document.getElementById('canvas').style.display = 'none';
 } 
 
 // Navigation functions to switch pages
@@ -270,7 +401,13 @@ function navigateToExercise(page, exerciseType) {
             exerciseCount = pushupCount;
         } else if (exerciseType === 'Pull-ups') {
             exerciseCount = pullupCount;
-        } 
+        } else if(exerciseType === 'Curls') {
+            exerciseCount = curlCount;
+        } else if (exerciseType === 'Shoulder Press') {
+            exerciseCount = shoulderPressCount;
+        } else if (exerciseType === 'Deadlift') {
+            exerciseCount = deadliftCount;
+        }
         document.getElementById('exercise-page').classList.remove('hidden');
         document.getElementById('exercise-title').textContent = exerciseType;
         document.getElementById('rep-count').textContent = `${exerciseType} Count: ${exerciseCount}`;
