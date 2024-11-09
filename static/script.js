@@ -70,19 +70,19 @@ async function loop() {
                 detectSquat(poses[0]);
                 break;
             case 'Push-ups':
-                detectPushup(poses[0]); // Implement this function for push-up detection
+                detectPushup(poses[0]); 
                 break;
             case 'Pull-ups':
-                detectPullup(poses[0]); // Implement this function for pull-up detection
+                detectPullup(poses[0]); 
                 break;
             case 'Curls':
-                detectSquat(poses[0]);//detectBench(poses[0]); // Implement this function for bench detection
+                detectCurl(poses[0]);
                 break;
             case 'Shoulder Press':
-                detectShoulderPress(poses[0]); // Use the same squat detection for Barbell Squat
+                detectShoulderPress(poses[0]); 
                 break;
             case 'Deadlift':
-                detectDeadlift(poses[0]); // Implement this function for deadlift detection
+                detectDeadlift(poses[0]); 
                 break;
         }
     }
@@ -95,35 +95,34 @@ function detectSquat(pose) {
 
     // Check if keypoints are available and have high confidence
     if (keypoints && keypoints[11].score > 0.5 && keypoints[12].score > 0.5 && 
-        keypoints[13].score > 0.5 && keypoints[14].score > 0.5){
+        keypoints[13].score > 0.5 && keypoints[14].score > 0.5 && 
+        keypoints[15].score > 0.5 && keypoints[16].score > 0.5) {
         const leftHip = keypoints[11]; // Left hip
         const rightHip = keypoints[12]; // Right hip
         const leftKnee = keypoints[13]; // Left knee
         const rightKnee = keypoints[14]; // Right knee
-        
+        const leftAnkle = keypoints[15]; // Left ankle
+        const rightAnkle = keypoints[16]; // Right ankle
 
         // Calculate angles for both legs
-        const leftAngle = calculateTwoPointAngle(leftHip, leftKnee);
-        const rightAngle = calculateTwoPointAngle(rightHip, rightKnee);
+        const leftAngle = calculateAngle(leftHip, leftKnee, leftAnkle);
+        const rightAngle = calculateAngle(rightHip, rightKnee, rightAnkle);
         
         
         // Check if the user is in a squat position
-        if (leftAngle < 45 || rightAngle < 45){
+        if (leftAngle < 120 || rightAngle < 120){//knee.y < hip.y && knee.y < ankle.y) {
             // User is squatting
             console.log(`User is squatting`);
-            console.log(`Left: ${leftAngle}, Right: ${rightAngle}`);
             if (!isSquatting) {
-                isSquatting = true; 
+                isSquatting = true; // Set the state to squatting
             }
         } else {
             console.log(`User is not squatting`);
             // User is not squatting
             if (isSquatting) {
-                squatCount++; 
-                isSquatting = false; 
-                console.log(`***`); 
-                console.log(`Squat Count: ${squatCount}`); // Log the count 
-                console.log(`***`); 
+                squatCount++; // Increment the squat count
+                isSquatting = false; // Reset the state
+                console.log(`Squat Count: ${squatCount}`); // Log the count (you can display this in the UI)
                 document.getElementById('rep-count').textContent = `Squat Count: ${squatCount}`;
             }
         }
@@ -190,7 +189,7 @@ function detectPullup(pose) {
 
         // Check if the user is in a pull-up position
         //const isInPullupPosition = (leftElbowAngle < 30 || rightElbowAngle < 30); 
-        //const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
+        const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
         //const isArmsAboveHead = (leftWrist.y < leftShoulder.y || rightWrist.y < rightShoulder.y);
         //console.log(`----------`); 
         console.log(`L Sho Y: ${leftShoulder.y}, El Y: ${leftElbow.y}, ${isInPullupPosition}`);
@@ -264,9 +263,9 @@ function detectShoulderPress(pose) {
         const rightElbow = keypoints[8]; 
 
         // Check if the user is in a shoulder press position
-        const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
+        const isInShoulderPressPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
         
-        if (isInPullupPosition){
+        if (isInShoulderPressPosition){
             // User is in the lowering phase of the shoulder press
             console.log(`User is doing a shoulder press`);
             if (!isDoingShoulderPress) {
@@ -282,6 +281,46 @@ function detectShoulderPress(pose) {
                 console.log(`Shoulder Press Count: ${shoulderPressCount}`); 
                 console.log(`***`); 
                 document.getElementById('rep-count').textContent = `Shoulder Press Count: ${shoulderPressCount}`;
+            }
+        }
+    }
+}
+
+function detectCurl(pose) {
+    const keypoints = pose.keypoints;
+
+    // Check if keypoints are available and have high confidence
+    if (keypoints && keypoints[5].score > 0.5 && keypoints[6].score > 0.5 && 
+        keypoints[7].score > 0.5 && keypoints[8].score > 0.5 && 
+        keypoints[9].score > 0.5 && keypoints[10].score > 0.5){ 
+        const leftShoulder = keypoints[5]; 
+        const rightShoulder = keypoints[6]; 
+        const leftElbow = keypoints[7]; 
+        const rightElbow = keypoints[8]; 
+        const leftHand = keypoints[9]; 
+        const rightHand = keypoints[10]; 
+
+        // Check if the user is in a curl position
+        const leftElbowAngle = calculateAngle(leftShoulder, leftElbow, leftHand);
+        const rightElbowAngle = calculateAngle(rightShoulder, rightElbow, rightHand);
+
+        console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
+        if (leftElbowAngle > 45 || rightElbowAngle > 45){
+            // User is in the lowering phase of the curl
+            console.log(`User is doing a curl`);
+            if (!isDoingCurl) {
+                isDoingCurl = true; 
+            }
+        } else {
+            // User is not in the curl position
+            if (isDoingCurl) {
+                curlCount++; 
+                isDoingCurl = false; 
+                
+                console.log(`***`); 
+                console.log(`Curl Count: ${curlCount}`); 
+                console.log(`***`); 
+                document.getElementById('rep-count').textContent = `Curl Count: ${curlCount}`;
             }
         }
     }
@@ -448,4 +487,49 @@ function clearTable() {
     table.innerHTML = `<tr><th>Meal</th><th>Calories</th><th>Actions</th></tr>`;
 }
 
+// Send message function
+function sendMessage() {
+    const userInput = document.getElementById("user-input").value;
+    if (userInput.trim() === "") return;
+  
+    addMessageToChat(userInput, "user");
+  
+    fetch("/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        message: userInput,
+        exerciseType: currentExercise,
+      }),
+    })
+      .then((response) => response.json())
+      .then((data) => {
+        addMessageToChat(data.response, "bot");
+      })
+      .catch((error) => {
+        console.error("Error:", error);
+      });
+  
+    document.getElementById("user-input").value = "";
+  }
 
+  // Add message to chat
+function addMessageToChat(message, sender) {
+    const chatContainer = document.getElementById("chat-container");
+    const messageElement = document.createElement("div");
+    messageElement.classList.add("message", sender + "-message");
+    messageElement.textContent = message;
+    chatContainer.appendChild(messageElement);
+    chatContainer.scrollTop = chatContainer.scrollHeight;
+  }
+  
+  // Event listener for Enter key
+  document
+    .getElementById("user-input")
+    .addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        sendMessage();
+      }
+    });
