@@ -21,7 +21,7 @@
         
         <!-- Workout selection buttons -->
         <div class="workout-options">
-            <button onclick="navigateTo('bodyweight')">Weights Workout</button>
+            <button onclick="navigateTo('weights')">Weights Workout</button>
             <button onclick="navigateTo('bodyweight')">Bodyweight Workout</button>
         </div>
         
@@ -53,16 +53,33 @@
         <button onclick="navigateToExercise('exercise', 'Pull-ups')">Pull-ups</button>
     </div>
 
+    <!-- Weights Workout Page -->
+    <div id="weights-page" class="page hidden">
+        <h2 id="workout-type">Weights Exercises</h2>
+        <button onclick="navigateToExercise('exercise', 'Curls')">Curls</button>
+        <button onclick="navigateToExercise('exercise', 'Shoulder Press')">Shoulder Press</button>
+        <button onclick="navigateToExercise('exercise', 'Deadlift')">Deadlift</button>
+    </div>
+
     <div id="exercise-page" class="page hidden">
         <h2 id="exercise-title">[Exercise type]</h2>
         <div id="webcam-container">
-            <video autoplay playsinline></video>
-            <canvas id="canvas"></canvas>
+            <canvas id="canvas" width="640" height="480"></canvas>
+            <video id="video" width="640" height="480" autoplay playsinline></video>
         </div>
         <div id="label-container"></div>
         <button type="button" onclick="init()">Start Workout</button>
         <button type="button" onclick="stopWorkout()">Stop Workout</button>
         <div id="rep-count">[Exercise type] Count: 0</div>
+    </div>
+
+    <div id="container" class="page hidden">
+        <!-- Chat interface -->
+        <div id="chat-container"></div>
+        <div id="input-container">
+          <input type="text" id="user-input" placeholder="Type your message..." />
+          <button onclick="sendMessage()">Send</button>
+        </div>
     </div>
 
     <!-- Required scripts -->
