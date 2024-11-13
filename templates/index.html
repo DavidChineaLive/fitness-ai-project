@@ -35,14 +35,28 @@
         <table id="calorie-table">
             <tr>
                 <th>Meal</th>
-                <th>Calories</th>
+                <th>Calories per Serving</th>
+                <th>Servings</th>
                 <th>Actions</th>
             </tr>
         </table>
+        <div id="total-calories" style="margin-top: 10px; font-weight: bold;">
+            Total Calories: 0
+        </div>
         <input type="text" id="meal-input" placeholder="Meal">
-        <input type="number" id="calories-input" placeholder="Calories">
+        <input type="number" id="calories-input" placeholder="Calories per Serving">
+        <!-- <input type="number" id="servings-input" placeholder="Servings"> -->
         <button onclick="addCalorie()">Add</button>
         <button onclick="clearTable()">Clear Tracker</button>
+        <!-- Food Scan Feature -->
+        <div>
+            <input type="file" id="food-image-input" accept="image/*">
+            <button onclick="scanFood()">Scan Food</button>
+            <!-- Placeholder for displaying uploaded image -->
+            <div id="uploaded-image-container" style="margin-top: 10px;">
+                <img id="uploaded-image" src="" alt="Uploaded Food Image" style="max-width: 100%; display: none;">
+            </div>
+        </div>
     </div>
 
     <!-- Bodywights Workout Page -->
