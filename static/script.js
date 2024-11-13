@@ -1,12 +1,14 @@
 let bodyTracker, video, ctx, labelContainer;
 let currentExercise = "";
 let currentPage = 'home';
+let currentCount = 0;
 let squatCount = 0;
 let pushupCount = 0;
 let pullupCount = 0;
 let curlCount = 0; 
 let shoulderPressCount =0;
 let deadliftCount = 0; 
+let totalCalories = 0;
 let isSquatting = false; // For squat detection
 let isDoingPushup = false; // For push-up detection
 let isDoingPullup = false; // For pull-up detection
@@ -416,6 +418,7 @@ function stopWorkout() {
     } else if (currentExercise === 'Deadlift') {
         deadliftCount = 0;
     }
+    currentCount = 0;
     //document.getElementById('webcam-container').style.display = 'none';
     //document.getElementById('canvas').style.display = 'none';
 } 
@@ -448,6 +451,7 @@ function navigateToExercise(page, exerciseType) {
             exerciseCount = deadliftCount;
         }
         document.getElementById('exercise-page').classList.remove('hidden');
+        document.getElementById('container').classList.remove('hidden');
         document.getElementById('exercise-title').textContent = exerciseType;
         document.getElementById('rep-count').textContent = `${exerciseType} Count: ${exerciseCount}`;
         currentPage = page;
@@ -465,26 +469,134 @@ function toggleTheme() {
 
 function addCalorie() {
     const meal = document.getElementById('meal-input').value;
-    const calories = document.getElementById('calories-input').value;
-    if (meal && calories) {
-        const table = document.getElementById('calorie-table');
-        const row = table.insertRow();
-        const mealCell = row.insertCell(0);
-        const calorieCell = row.insertCell(1);
-        const actionCell = row.insertCell(2);
-        mealCell.innerHTML = meal;
-        calorieCell.innerHTML = calories;
-        actionCell.innerHTML = `<button onclick="deleteRow(this)">Delete</button>`;
+    const calories = parseInt(document.getElementById('calories-input').value, 10);
+    
+    if (meal && !isNaN(calories)) {
+        addCalorieToTable(meal, calories);
     }
 }
 
 function deleteRow(button) {
-    button.parentElement.parentElement.remove();
+    const row = button.parentElement.parentElement;
+    const totalCaloriesForRow = parseInt(row.cells[3].textContent, 10) || 0;
+
+    // Subtract row calories from the total
+    updateTotalCalories(-totalCaloriesForRow);
+
+    // Remove the row
+    row.remove();
+}
+
+function updateTotalCalories(calories) {
+    totalCalories += calories;
+    document.getElementById('total-calories').textContent = `Total Calories: ${totalCalories}`;
+}
+
+function updateCaloriesForRow(caloriesPerServing, servings, totalCalorieCell) {
+    const totalCaloriesForRow = caloriesPerServing * servings;
+    const previousTotal = parseInt(totalCalorieCell.textContent, 10) || 0;
+
+    // Update the total calories with the difference
+    updateTotalCalories(totalCaloriesForRow - previousTotal);
+
+    // Update the row's total calories cell
+    totalCalorieCell.textContent = totalCaloriesForRow;
 }
 
 function clearTable() {
     const table = document.getElementById('calorie-table');
-    table.innerHTML = `<tr><th>Meal</th><th>Calories</th><th>Actions</th></tr>`;
+    table.innerHTML = `<tr><th>Meal</th><th>Calories per Serving</th><th>Servings</th><th>Total Calories</th><th>Actions</th></tr>`;
+    totalCalories = 0;
+    document.getElementById('total-calories').textContent = `Total Calories: 0`;
+}
+
+async function scanFood() {
+    const imageInput = document.getElementById("food-image-input");
+    if (!imageInput.files || imageInput.files.length === 0) {
+        alert("Please select an image of the food.");
+        return;
+    }
+
+    const formData = new FormData();
+    formData.append("image", imageInput.files[0]);
+
+    try {
+        displayUploadedImage(imageInput.files[0]);
+
+        const response = await fetch("/food_scan", {
+            method: "POST",
+            body: formData
+        });
+        const data = await response.json();
+
+        if (data.error) {
+            alert("Food recognition failed: " + data.error);
+        } else {
+            parseAndAddFoodData(data.response);
+        }
+    } catch (error) {
+        console.error("Error scanning food:", error);
+        alert("An error occurred while scanning the food.");
+    }
+}
+
+function displayUploadedImage(file) {
+    const img = document.getElementById("uploaded-image");
+    img.src = URL.createObjectURL(file);
+    img.style.display = "block";
+}
+
+function parseAndAddFoodData(responseText) {
+    // Parsing the Gemini response assuming it contains food item and calorie info
+    const foodItems = responseText.split('\n'); // Example format
+
+    foodItems.forEach(item => {
+        console.log(`Each Item: ${item}`);  // Log each item for debugging
+
+        // Split by '|' and trim each part
+        const parts = item.split('|').map(part => part.trim());
+        //console.log(`Parts Length: ${parts.length}`);
+        // Ensure there are enough parts and parse calories
+        if (parts.length >= 3) {
+            const foodName = parts[1];
+            const calorieValue = parseInt(parts[2], 10);
+
+            if (foodName && !isNaN(calorieValue)) {
+                addCalorieToTable(foodName, calorieValue);
+                //updateTotalCalories(calorieValue);
+            }else{
+                console.log("Invalid food item format");
+            }
+        }
+    });
+}
+
+function addCalorieToTable(food, caloriesPerServing) {
+    const table = document.getElementById('calorie-table');
+    const row = table.insertRow();
+    const mealCell = row.insertCell(0);
+    const calorieCell = row.insertCell(1);
+    const servingsCell = row.insertCell(2);
+    const totalCalorieCell = row.insertCell(3);
+    const actionCell = row.insertCell(4);
+
+    mealCell.innerHTML = food;
+    calorieCell.innerHTML = caloriesPerServing;
+
+    const servingsInput = document.createElement('input');
+    servingsInput.type = 'number';
+    servingsInput.value = 1;
+    servingsInput.min = 1;
+    servingsInput.addEventListener('input', function() {
+        updateCaloriesForRow(caloriesPerServing, servingsInput.value, totalCalorieCell);
+    });
+    servingsCell.appendChild(servingsInput);
+
+    // Set initial total calories for this row based on 1 serving
+    updateCaloriesForRow(caloriesPerServing, 1, totalCalorieCell);
+
+    // Add delete button
+    actionCell.innerHTML = `<button onclick="deleteRow(this, ${totalCalorieCell.textContent})">Delete</button>`;
 }
 
 // Send message function
