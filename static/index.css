@@ -30,6 +30,9 @@ button {
     width: 640px; 
     height: 480px;
     overflow: hidden;
+    display: flex; /* Added to enable flex properties */
+    justify-content: center; /* Center the video within the container */
+    align-items: center;
 }
 
 #webcam-container video {
