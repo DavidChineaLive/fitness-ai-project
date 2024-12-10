@@ -2,6 +2,7 @@ let bodyTracker, video, ctx, labelContainer;
 let currentExercise = "";
 let currentPage = 'home';
 let currentCount = 0;
+let repGoal = 20;
 let squatCount = 0;
 let pushupCount = 0;
 let pullupCount = 0;
@@ -123,9 +124,15 @@ function detectSquat(pose) {
             // User is not squatting
             if (isSquatting) {
                 squatCount++; // Increment the squat count
+                currentCount = squatCount;
                 isSquatting = false; // Reset the state
-                console.log(`Squat Count: ${squatCount}`); // Log the count (you can display this in the UI)
-                document.getElementById('rep-count').textContent = `Squat Count: ${squatCount}`;
+                console.log(`Squat Count: ${squatCount}`);
+                document.getElementById('rep-count').textContent = `Squat Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
@@ -162,9 +169,15 @@ function detectPushup(pose) {
             // User is not in the push-up position
             if (isDoingPushup) {
                 pushupCount++; 
+                currentCount = pushupCount;
                 isDoingPushup = false; 
                 console.log(`Push-up Count: ${pushupCount}`); 
-                document.getElementById('rep-count').textContent = `Push-up Count: ${pushupCount}`;
+                document.getElementById('rep-count').textContent = `Push-up Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
@@ -186,21 +199,12 @@ function detectPullup(pose) {
         
 
         // Calculate the angle at the elbows
-        //const leftElbowAngle = calculateAngle(leftShoulder, leftElbow, leftWrist);
         const rightElbowAngle = calculateAngle(rightShoulder, rightElbow, rightWrist);
-
-        // Check if the user is in a pull-up position
-        //const isInPullupPosition = (leftElbowAngle < 30 || rightElbowAngle < 30); 
         const isInPullupPosition = (leftElbow.y < leftShoulder.y || rightElbow.y < rightShoulder.y); 
-        //const isArmsAboveHead = (leftWrist.y < leftShoulder.y || rightWrist.y < rightShoulder.y);
-        //console.log(`----------`); 
-        console.log(`L Sho Y: ${leftShoulder.y}, El Y: ${leftElbow.y}, ${isInPullupPosition}`);
-        console.log(`R Sho Y: ${rightShoulder.y}, El Y: ${rightElbow.y}, ${isInPullupPosition}`);
-        //console.log(`----------`); 
-        if (isInPullupPosition){//&& isArmsAboveHead) {
+       
+        if (isInPullupPosition){
             // User is in the lowering phase of the pull-up
             console.log(`User is doing a pull up`);
-            //console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
             if (!isDoingPullup) {
                 isDoingPullup = true; 
             }
@@ -208,13 +212,15 @@ function detectPullup(pose) {
             // User is not in the pull-up position
             if (isDoingPullup) {
                 pullupCount++; 
+                currentCount = pullupCount;
                 isDoingPullup = false; 
-                
-                console.log(`***`); 
-                //console.log(`Left: ${leftElbowAngle}, Right: ${rightElbowAngle}`);
                 console.log(`Pull-up Count: ${pullupCount}`); 
-                console.log(`***`); 
-                document.getElementById('rep-count').textContent = `Pull-up Count: ${pullupCount}`;
+                document.getElementById('rep-count').textContent = `Pull-up Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
@@ -245,9 +251,15 @@ function detectDeadlift(pose){
             // User is not in the deadlift position
             if (isDoingDeadlift) {
                 deadliftCount++; 
+                currentCount = deadliftCount;
                 isDoingDeadlift = false; 
                 console.log(`Deadlift Count: ${deadliftCount}`); 
-                document.getElementById('rep-count').textContent = `Deadlift Count: ${deadliftCount}`;
+                document.getElementById('rep-count').textContent = `Deadlift Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
@@ -277,12 +289,15 @@ function detectShoulderPress(pose) {
             // User is not in the shoulder press position
             if (isDoingShoulderPress) {
                 shoulderPressCount++; 
+                currentCount = shoulderPressCount;
                 isDoingShoulderPress = false; 
-                
-                console.log(`***`); 
                 console.log(`Shoulder Press Count: ${shoulderPressCount}`); 
-                console.log(`***`); 
-                document.getElementById('rep-count').textContent = `Shoulder Press Count: ${shoulderPressCount}`;
+                document.getElementById('rep-count').textContent = `Shoulder Press Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
@@ -317,15 +332,24 @@ function detectCurl(pose) {
             // User is not in the curl position
             if (isDoingCurl) {
                 curlCount++; 
+                currentCount = curlCount;
                 isDoingCurl = false; 
-                
-                console.log(`***`); 
                 console.log(`Curl Count: ${curlCount}`); 
-                console.log(`***`); 
-                document.getElementById('rep-count').textContent = `Curl Count: ${curlCount}`;
+                document.getElementById('rep-count').textContent = `Curl Count: ${currentCount}`;
+
+                // Check for quarter milestones
+                if (currentCount % (repGoal / 4) === 0) {
+                    sendProgressMessage(currentCount);
+                }
             }
         }
     }
+}
+
+function updateRepGoal() {
+    const goal = document.getElementById('rep-goal-input').value;
+    repGoal = goal;
+    document.getElementById('rep-goal').textContent = `Rep Goal: ${repGoal}`;
 }
 
 function calculateTwoPointAngle(hip, knee) {
@@ -419,6 +443,7 @@ function stopWorkout() {
         deadliftCount = 0;
     }
     currentCount = 0;
+    document.getElementById('rep-count').textContent = `${exerciseType} Count: ${currentCount}`;
     //document.getElementById('webcam-container').style.display = 'none';
     //document.getElementById('canvas').style.display = 'none';
 } 
@@ -426,8 +451,39 @@ function stopWorkout() {
 // Navigation functions to switch pages
 function navigateTo(page) {
     document.querySelectorAll('.page').forEach(p => p.classList.add('hidden'));
-    document.getElementById(`${page}-page`).classList.remove('hidden');
+    document.querySelectorAll('.modal').forEach(p => p.classList.add('hidden'));
+    const targetPage = document.getElementById(`${page}-page`);
+    const targetModal = document.getElementById(`${page}-modal`);
+    
+    if (targetPage) {
+        targetPage.classList.remove('hidden');
+    } else if (targetModal) {
+        targetModal.classList.remove('hidden');
+    }
+    
     currentPage = page;
+    if (page === 'home') {
+        clearChatSession();
+    }
+}
+
+function clearChatSession() {
+    fetch('/clear_chat_session', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        }
+    }).then(response => {
+        if (response.ok) {
+            console.log('Chat session cleared');
+            // Clear chat messages from the UI if needed
+            document.getElementById('chat-container').innerHTML = '';
+        } else {
+            console.error('Failed to clear chat session');
+        }
+    }).catch(error => {
+        console.error('Error:', error);
+    });
 }
 
 // Navigation functions to switch exercises
@@ -436,24 +492,24 @@ function navigateToExercise(page, exerciseType) {
 
     if (page === 'exercise') {
         currentExercise = exerciseType;
-        exerciseCount = 0;
+        currentCount = 0;
         if (exerciseType === 'Squats') {
-            exerciseCount = squatCount;
+            currentCount = squatCount;
         } else if (exerciseType === 'Push-ups') {
-            exerciseCount = pushupCount;
+            currentCount = pushupCount;
         } else if (exerciseType === 'Pull-ups') {
-            exerciseCount = pullupCount;
+            currentCount = pullupCount;
         } else if(exerciseType === 'Curls') {
-            exerciseCount = curlCount;
+            currentCount = curlCount;
         } else if (exerciseType === 'Shoulder Press') {
-            exerciseCount = shoulderPressCount;
+            currentCount = shoulderPressCount;
         } else if (exerciseType === 'Deadlift') {
-            exerciseCount = deadliftCount;
+            currentCount = deadliftCount;
         }
         document.getElementById('exercise-page').classList.remove('hidden');
         document.getElementById('container').classList.remove('hidden');
         document.getElementById('exercise-title').textContent = exerciseType;
-        document.getElementById('rep-count').textContent = `${exerciseType} Count: ${exerciseCount}`;
+        document.getElementById('rep-count').textContent = `${exerciseType} Count: ${currentCount}`;
         currentPage = page;
     } else {
         navigateTo('home');
@@ -519,6 +575,7 @@ async function scanFood() {
 
     const formData = new FormData();
     formData.append("image", imageInput.files[0]);
+    console.log(`FormData: ${formData}`);
 
     try {
         displayUploadedImage(imageInput.files[0]);
@@ -527,13 +584,20 @@ async function scanFood() {
             method: "POST",
             body: formData
         });
-        const data = await response.json();
+        
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
 
+        const data = await response.json();
+        console.log(`[scanFood] Stringified ${JSON.stringify(data.response)}`);
         if (data.error) {
             alert("Food recognition failed: " + data.error);
         } else {
-            parseAndAddFoodData(data.response);
+            // Pass the parsed JSON directly to the parser
+            parseAndAddFoodData(JSON.stringify(data.response));
         }
+    
     } catch (error) {
         console.error("Error scanning food:", error);
         alert("An error occurred while scanning the food.");
@@ -541,6 +605,7 @@ async function scanFood() {
 }
 
 function displayUploadedImage(file) {
+    console.log(`displayUploadedImage: ${file}`);
     const img = document.getElementById("uploaded-image");
     img.src = URL.createObjectURL(file);
     img.style.display = "block";
@@ -548,31 +613,52 @@ function displayUploadedImage(file) {
 
 function parseAndAddFoodData(responseText) {
     // Parsing the Gemini response assuming it contains food item and calorie info
-    const foodItems = responseText.split('\n'); // Example format
+    //const foodItems = responseText.split('\n'); // Example format
+    console.log(`*******\nResponse Text: ${responseText} \n********`);
+    const data = JSON.parse(responseText);
+    const foodItemRegex = /{\s*"food_name"\s*:\s*"([^"]+)"\s*,\s*"calorie_count"\s*:\s*"([^"]+)"\s*,\s*"food_category"\s*:\s*"([^"]+)"\s*}/g;
+    const matches = [...data.matchAll(foodItemRegex)];
 
-    foodItems.forEach(item => {
-        console.log(`Each Item: ${item}`);  // Log each item for debugging
+    if (matches.length === 0) {
+        console.error("No valid food items found in the response.");
+        return;
+    }
 
-        // Split by '|' and trim each part
-        const parts = item.split('|').map(part => part.trim());
-        //console.log(`Parts Length: ${parts.length}`);
-        // Ensure there are enough parts and parse calories
-        if (parts.length >= 3) {
-            const foodName = parts[1];
-            const calorieValue = parseInt(parts[2], 10);
+    console.log(`Data: ${data}`);
+    console.log(`Data: ${matches}`);
+    
+    matches.forEach(match => {
+        const foodName = match[1]; // Captured group for food_name
+        const calorieValue = parseInt(match[2], 10); // Captured group for calorie_count
+        const foodCategory = match[3]; // Captured group for food_category
 
-            if (foodName && !isNaN(calorieValue)) {
-                addCalorieToTable(foodName, calorieValue);
-                //updateTotalCalories(calorieValue);
-            }else{
-                console.log("Invalid food item format");
-            }
+        if (foodName && !isNaN(calorieValue)) {
+            // Add to the calorie table or process further
+            addCalorieToTable(foodName, calorieValue);
+            console.log(`Added: ${foodName} (${calorieValue} cal) - Category: ${foodCategory}`);
+        } else {
+            console.warn(`Invalid food data: ${match[0]}`);
         }
     });
 }
 
 function addCalorieToTable(food, caloriesPerServing) {
     const table = document.getElementById('calorie-table');
+    // Check if the food already exists in the table
+    for (let i = 1; i < table.rows.length; i++) { // Start at 1 to skip the header row
+        const row = table.rows[i];
+        const mealCell = row.cells[0]; // Assuming the food name is in the first cell
+
+        if (mealCell.textContent === food) {
+            // Update servings input for the existing row
+            const servingsInput = row.cells[2].querySelector('input');
+            servingsInput.value = parseInt(servingsInput.value) + 1; // Increment servings
+            servingsInput.dispatchEvent(new Event('input')); // Trigger input event to update total calories
+            console.log(`${food} already exists. Updated servings instead.`);
+            return;
+        }
+    }
+
     const row = table.insertRow();
     const mealCell = row.insertCell(0);
     const calorieCell = row.insertCell(1);
@@ -614,6 +700,8 @@ function sendMessage() {
       body: JSON.stringify({
         message: userInput,
         exerciseType: currentExercise,
+        exerciseCount: currentCount,
+        exerciseGoal: repGoal,
       }),
     })
       .then((response) => response.json())
@@ -626,6 +714,30 @@ function sendMessage() {
   
     document.getElementById("user-input").value = "";
   }
+
+  function sendProgressMessage(progress) {
+    const progressMessage = `Great job! You've reached ${progress} reps out of your goal of ${repGoal}!`;
+
+    fetch("/chat", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+            message: progressMessage,
+            exerciseType: currentExercise,
+            exerciseCount: currentCount,
+            exerciseGoal: repGoal,
+        }),
+    })
+    .then((response) => response.json())
+    .then((data) => {
+        addMessageToChat(data.response, "bot");
+    })
+    .catch((error) => {
+        console.error("Error:", error);
+    });
+}
 
   // Add message to chat
 function addMessageToChat(message, sender) {
@@ -645,3 +757,28 @@ function addMessageToChat(message, sender) {
         sendMessage();
       }
     });
+
+async function submitPlanForm() {
+    const form = document.getElementById("plan-form");
+    const formData = new FormData(form);
+    const data = Object.fromEntries(formData.entries());
+
+    try {
+        const response = await fetch("/generate_plan", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify(data),
+        });
+        const result = await response.json();
+
+        if (result.error) {
+            alert("Error generating workout plan: " + result.error);
+        } else {
+            document.getElementById("plan-output").textContent = result.plan;
+            navigateTo('generated-plan');
+        }
+    } catch (error) {
+        console.error("Error:", error);
+        alert("An error occurred while generating the workout plan.");
+    }
+}

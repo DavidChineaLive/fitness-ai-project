@@ -27,6 +27,9 @@
         
         <!-- Calorie Tracker button -->
         <button id="calorie-tracker-btn" onclick="navigateTo('calories')">Calorie Tracker</button>
+
+        <h3>Generate Your Workout Plan</h3>
+        <button onclick="navigateTo('plan')">Generate Plan</button>
     </div>
 
     <!-- Calorie Tracker Page -->
@@ -37,6 +40,7 @@
                 <th>Meal</th>
                 <th>Calories per Serving</th>
                 <th>Servings</th>
+                <th>Calories per Meal</th>
                 <th>Actions</th>
             </tr>
         </table>
@@ -85,15 +89,58 @@
         <button type="button" onclick="init()">Start Workout</button>
         <button type="button" onclick="stopWorkout()">Stop Workout</button>
         <div id="rep-count">[Exercise type] Count: 0</div>
+        <div id="rep-goal">Rep Goal: 20</div>
+        <input type="number" id="rep-goal-input" placeholder="Input rep goal...">
+        <button onclick="updateRepGoal('')">Update</button>
     </div>
 
     <div id="container" class="page hidden">
-        <!-- Chat interface -->
         <div id="chat-container"></div>
         <div id="input-container">
           <input type="text" id="user-input" placeholder="Type your message..." />
           <button onclick="sendMessage()">Send</button>
         </div>
+    </div>
+
+
+    
+    <div id="plan-page" class="page hidden">
+        <h4>Workout Plan Details</h4>
+        <form id="plan-form">
+            <label for="weeks">Weeks:</label>
+            <input type="number" id="weeks" name="weeks" min="1" max="12" value="4" required>
+            
+            <label for="days">Days/Week:</label>
+            <input type="number" id="days" name="days" min="1" max="7" value="3" required>
+            
+            <label for="squat">Squat 1RM:</label>
+            <input type="number" id="squat" name="squat" min="0" max="1000" value="100" required>
+            
+            <label for="bench">Bench Press 1RM:</label>
+            <input type="number" id="bench" name="bench" min="0" max="1000" value="75" required>
+            
+            <label for="deadlift">Deadlift 1RM:</label>
+            <input type="number" id="deadlift" name="deadlift" min="0" max="1000" value="120" required>
+            
+            <label for="accessory">Accessory Exercises/Session:</label>
+            <input type="number" id="accessory" name="accessory" min="0" max="5" value="2" required>
+            
+            <label for="units">Units:</label>
+            <select id="units" name="units">
+                <option value="kilograms">Kilograms</option>
+                <option value="pounds">Pounds</option>
+            </select>
+            
+            <button type="button" onclick="submitPlanForm()">Generate</button>
+            <button type="button" onclick="navigateTo('home')">Cancel</button>
+        </form>
+    </div>
+
+   
+    <div id="generated-plan" class="page hidden">
+        <h4>Your Workout Plan</h4>
+        <pre id="plan-output"></pre>
+        <button onclick="navigateTo('home')">Back to Home</button>
     </div>
 
     <!-- Required scripts -->
