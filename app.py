@@ -7,6 +7,8 @@ import os
 from PIL import Image
 from huggingface_hub import InferenceClient, HfApi, login
 from transformers import pipeline
+import google.generativeai as genai
+import requests
 
 
 app = Flask(__name__)
@@ -24,6 +26,7 @@ app.secret_key = 'supersecretkey'
 load_dotenv()
 genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
 model = genai.GenerativeModel('gemini-1.5-flash')
+model2 = genai.GenerativeModel('gemini-1.5-pro')
 
 # api = HfApi()
 client = InferenceClient(api_key=os.getenv("HUGGING_FACE_KEY"))
@@ -164,6 +167,7 @@ def generate_plan():
     data = request.json
     if data is None:
         return jsonify({"error": "Invalid JSON input"}), 400
+    
     days = data.get("days", 3)
     weeks = data.get("weeks", 4)
     squat = data.get("squat", 100)
@@ -187,28 +191,20 @@ def generate_plan():
         - Bench press 1RM: {bench} {units}
         - Deadlift 1RM: {deadlift} {units}
         - Accessory exercises per session: {accessory}
-        Provide the first week's training plan.
+        Provide the first week's training plan. (Return a fell formatted response with only astricks)
+         under no circumstances are you allowed to use an asterik
         """
     }
 
-    # try:
-    completion = client_openai.chat.completions.create(
-    messages=[
-        {
-            "role": "system",
-            "content": system_message["content"],
-        },
-        {
-            "role": "user",
-            "content": user_message["content"],
-        },
-    ],
-    model="gpt-3.5-turbo",
-    )
-    plan = completion.choices[0].message.content
-    return jsonify({"plan": plan})
-    # except Exception as e:
-    #     return jsonify({"error": str(e)}), 500
+    try:
+        print("flag")
+        prompt = system_message["content"] + user_message["content"]
+        plan = model.generate_content(prompt)
+        plan_text = plan.text
+        print(f'Plan text: {plan_text}')
+        return jsonify({"plan": plan_text})
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
 
 
 

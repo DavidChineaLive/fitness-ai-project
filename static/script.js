@@ -774,11 +774,33 @@ async function submitPlanForm() {
         if (result.error) {
             alert("Error generating workout plan: " + result.error);
         } else {
-            document.getElementById("plan-output").textContent = result.plan;
+            displayPlan(result.plan);
             navigateTo('generated-plan');
         }
     } catch (error) {
         console.error("Error:", error);
         alert("An error occurred while generating the workout plan.");
     }
+}
+
+function displayPlan(planText) {
+    const planOutput = document.getElementById("plan-output");
+    planOutput.innerHTML = formatPlan(planText);
+}
+
+function formatPlan(planText) {
+    // Replace * ** with <h4>
+    planText = planText.replace(/\* \*\*/g, "<h2>").replace(/\*\* \*/g, "</h2>");
+    
+    // Replace ** with <b>
+    planText = planText.replace(/\*\*/g, "<b>").replace(/\*\*/g, "</b>");
+    
+    // Replace * with <li> and wrap the entire text in <ul>
+    planText = planText.replace(/\*/g, "<li>").replace(/\*/g, "</li>");
+    planText = "<ul>" + planText + "</ul>";
+    
+    // // Replace newlines with <br>
+    planText = planText.replace(/\n/g, "<br>");
+    
+    return planText;
 }
