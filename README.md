@@ -1,5 +1,5 @@
-# AI Fitness Coach
-AI Fitness Coach is an interactive web application that combines the power of AI to enhance your fitness journey. It provides workout guidance, tracks calorie intake, and uses AI models to deliver feedback on form and food recognition.
+# FitnessAI
+FitnessAI is an interactive web application that combines the power of AI to enhance your fitness journey. It provides workout guidance, tracks calorie intake, and uses AI models to deliver feedback on form and food recognition.
 
 # Features
 1. AI-Powered Chat
