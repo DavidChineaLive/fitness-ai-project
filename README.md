@@ -1,5 +1,5 @@
 # FitnessAI
-FitnessAI is an interactive web application that combines the power of AI to enhance your fitness journey. It provides workout guidance, tracks calorie intake, and uses AI models to deliver feedback on form and food recognition.
+FitnessAI is a fitness assistant that uses TensorFlow to track body joints through a camera feed, calculating angles to precisely count completed exercises like dumbbell curls. For instance, it can detect shoulder, elbow, and wrist movements to accurately tally reps and provide real-time feedback. The app also integrates Google Gemini for meal recognition and calorie tracking and Hugging Face API to deliver motivational coaching through a chatbot. It’s an all-in-one fitness solution that combines cutting-edge technology with a seamless user experience.
 
 # Features
 1. AI-Powered Chat
